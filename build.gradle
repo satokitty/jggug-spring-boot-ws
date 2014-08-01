@@ -1,0 +1,56 @@
+buildscript {
+    ext {
+        springBootVersion = '1.1.4.RELEASE'
+    }
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven { url "http://repo.spring.io/release" }
+        maven { url "http://repo.spring.io/milestone" }
+        maven { url "http://repo.spring.io/snapshot" }
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
+
+apply plugin: 'groovy'
+apply plugin: 'spring-boot'
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+configurations {
+    providedCompile
+}
+
+dependencies {
+    compile "org.springframework.boot:spring-boot-starter-parent:${springBootVersion}"
+    compile "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
+    compile "org.springframework.boot:spring-boot-starter-data-jpa:${springBootVersion}"
+    compile "com.h2database:h2:1.4.+"
+    compile("org.lazyluke:log4jdbc-remix:0.2.7") {
+        exclude module: "junit"
+    }
+    testCompile "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
+    testCompile 'org.codehaus.groovy:groovy-all:2.+', "junit:junit:4.11"
+
+    providedCompile "org.projectlombok:lombok:1.+"
+}
+
+sourceSets {
+    main { compileClasspath += configurations.providedCompile }
+    test {
+        compileClasspath += configurations.providedCompile
+        runtimeClasspath += configurations.providedCompile
+    }
+}
+
+task makeDirs() << {
+    def sources = [sourceSets.main, sourceSets.test]
+    sources*.allSource*.srcDirs.flatten().each { File srcDir ->
+        srcDir.mkdirs()
+    }
+}
